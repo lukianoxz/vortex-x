@@ -1,0 +1,14 @@
+Fase 1: Ignition - Em andamento
+
+- [x] Configuração Inicial e Estrutura de Diretórios
+- [x] Criação do script vortex_uploader.sh simulado
+- [x] Documentos de arquitetura clonados para vortex-x/docs/
+- [x] Criação do arquivo progresso.txt
+- [ ] Implementação do Makefile Inteligente
+- [ ] Desenvolvimento do boot.asm
+- [ ] Desenvolvimento do vortex_x_loader (Rust)
+- [ ] Desenvolvimento do vortex_core_manager (Rust)
+- [ ] Implementação dos Sistemas Core (Rust)
+- [ ] Implementação do Guardian Core
+- [ ] Implementação dos Módulos de Sistema
+- [ ] Início do Vortex System (Ambiente do Usuário)

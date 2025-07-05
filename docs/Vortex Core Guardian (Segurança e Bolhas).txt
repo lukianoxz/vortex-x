@@ -1,0 +1,47 @@
+﻿Vortex Core Guardian (Segurança e Bolhas)
+O Guardian Core é o pilar central da segurança do Vortex X, implementando uma filosofia de "segurança por design" que torna ataques tradicionais impossíveis. Ele opera em conjunto com o Vortex Core, garantindo que cada ação seja auditada e controlada.
+1. Princípios Fundamentais do Guardian Core
+* Segurança Arquitetural, Não Adicional: A segurança é forjada na fundação do sistema. O Guardian Core não é um programa que se instala, mas uma parte intrínseca do microkernel, tornando a memória crítica invisível e auditando cada ação antes que ela ocorra.
+* Transparência: A confiança no Vortex X vem da robustez evidente e verificável de seu código aberto, não da "segurança por obscuridade".
+* Princípio do Menor Privilégio: Cada módulo e processo é projetado para operar com o mínimo de privilégios necessários para sua função.
+2. O Sistema de Bolhas de Segurança
+As "Bolhas de Segurança" são o mecanismo de isolamento fundamental do Vortex X, garantindo que cada processo opere em um ambiente rigorosamente controlado e isolado.
+* Criação de "Realidades" Separadas: Para cada processo criado (seja uma aplicação de Bolha 1 ou um serviço de Bolha 4), o Vortex Core constrói um espaço de endereço virtual completamente novo e personalizado para cada processo.
+* Ocultação de Memória (Fortaleza Invisível): As páginas de memória física que contêm o Vortex Core, o Guardian Core e outros componentes críticos simplesmente não são mapeadas nesse espaço de endereço virtual. Isso significa que, do ponto de vista de uma aplicação (e de qualquer malware dentro dela), essa memória não existe. Ela não pode atacar o que não pode ver.
+* Níveis de Bolha (Exemplos):
+   * Bolha 1 (Seguro): Aplicações confiáveis do sistema, como o Gerenciador de Arquivos.
+   * Bolha 2 (Restrito): Aplicações de usuário com acesso limitado, como o Navegador.
+   * Bolha 3 (Não Confiável): Downloads, programas experimentais da comunidade.
+   * Bolha 4 (Privilegiado): Serviços de sistema como filesystem_service, network_service, drivers de alto nível.
+3. Interceptação de Syscalls e Autorização
+* Mediação pelo Core: Toda comunicação entre Bolhas de Segurança diferentes, incluindo chamadas de sistema (syscalls), passa obrigatoriamente pelo Vortex Core.
+* Autenticação e Autorização: O Core verifica a identidade do emissor e do receptor. Em seguida, consulta o manifesto de segurança do módulo emissor para autorizar a operação. Se um processo tentar uma ação não permitida por seu manifesto, a operação é descartada e um alerta de segurança é gerado.
+* Exemplo: Se uma aplicação da Bolha 2 tentar enviar uma mensagem para o network_service (Bolha 4) para abrir uma porta, o Guardian Core verifica se o manifesto da aplicação permite essa ação.
+4. Gerenciamento de Memória para Drivers e IOMMU
+* Proteção Contra Drivers Invasivos: Uma das maiores ameaças de drivers maliciosos é o acesso indevido à memória (DMA).
+* IOMMU como Política: O Vortex Core utiliza a IOMMU (Input/Output Memory Management Unit) do hardware para aplicar a política das Bolhas de Segurança a nível de hardware.
+* Mapeamento Restrito: Quando um driver é carregado, o Vortex Core configura a IOMMU para permitir que o dispositivo acesse apenas as regiões de memória explicitamente alocadas a ele.
+* Bloqueio por Hardware: Se um driver malicioso tentar acessar memória fora de sua "jaula", a IOMMU do hardware bloqueará a operação e notificará o Vortex Core, que poderá então encerrar o driver imediatamente.
+5. Telas de Alerta e Confirmação do Guardian
+Quando uma ação de risco é detectada, o sistema entra em um modo de alerta projetado para ser imune a malwares.
+* Tela de Alerta Vermelha do Guardian Core:
+   * Aparência: Fundo vermelho (#FF0000), texto branco, com uma borda que pisca lentamente.
+   * Responsável: A lógica é do Guardian Core, mas a renderização é gerenciada por um serviço de UI de alta prioridade no Vortex System.
+   * Exemplo de Interface: ⚠️ ALERTA DE SEGURANÇA - GUARDIAN CORE ⚠️ O processo 'photo_editor.vx' (Bolha de Segurança 2) tentou executar uma operação de escrita direta na memória do Kernel. RISCO DETECTADO: ALTO - Possível injeção de rootkit ou exploit de elevação de privilégio. ESCOLHA UMA AÇÃO IMEDIATA: [1] Interromper processo e deletar permanentemente o programa e suas dependências. [2] Interromper processo e mover o programa para uma quarentena isolada para análise. [3] Tentar remover apenas o código malicioso do programa (experimental). [4] Permitir execução (NÃO RECOMENDADO).
+   * Mecanismos Anti-Macro e Anti-Spoofing:
+      * Layout Randômico: Posição da janela de alerta e ordem das opções mudam a cada vez.
+      * Rastreamento da Origem do Input: Ignora inputs de software (eventos sintetizados), exigindo interação de hardware físico.
+      * Confirmação Ativa: Para ações críticas, exige que o usuário digite uma palavra exibida na tela (ex: "CONFIRMAR").
+* Status do Guardian (🛡️): Um ícone de escudo na doca de controle fornece feedback visual constante:
+   * Verde: Sistema limpo.
+   * Amarelo: Processo em quarentena ou operação de baixo risco bloqueada.
+   * Vermelho Piscando: Alerta de segurança ativo! Ameaça crítica detectada e bloqueada, aguardando ação do usuário.
+6. Gerenciamento de Segredos: O Vortex Vault
+* vault_service: Serviço de sistema que armazena credenciais do usuário e aplicações em um banco de dados criptografado.
+* Chave Mestra: Derivada da senha de login do usuário (via Argon2) e mantida em memória protegida pelo Guardian Core, nunca escrita em disco.
+* Acesso por Aplicação: Aplicações devem declarar necessidade de acesso em seu manifesto. O Guardian exibe uma tela de confirmação na primeira tentativa de acesso.
+7. Plano de Resposta a Incidentes de Segurança (VIRT)
+* Relato Privado: Vulnerabilidades são relatadas de forma privada para security@vortex-os.org usando criptografia PGP.
+* Triagem e Confirmação: VIRT confirma a vulnerabilidade, atribui severidade e inicia desenvolvimento de patch em repositório privado.
+* Distribuição Silenciosa (opcional): Para vulnerabilidades críticas, patch pode ser enviado via canal de emergência antes da divulgação pública.
+* Divulgação Coordenada: Boletim de segurança publicado no blog oficial (com CVE) e patch liberado para todos os usuários.

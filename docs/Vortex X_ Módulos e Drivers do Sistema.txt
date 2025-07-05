@@ -1,0 +1,68 @@
+﻿Vortex X: Módulos e Drivers do Sistema
+O Vortex X adota uma abordagem radicalmente modular para drivers e serviços, garantindo isolamento, segurança e flexibilidade. A maioria desses componentes opera em espaço de usuário, dentro de Bolhas de Segurança, e se comunica com o Vortex Core através de APIs bem definidas.
+1. Paradigma de Drivers do Vortex X: Isolamento e Consentimento
+* Drivers em Espaço de Usuário: Diferente de sistemas monolíticos, onde drivers residem no kernel, no Vortex X, todo driver opera em espaço de usuário, dentro de uma Bolha de Segurança. Isso garante que uma falha ou vulnerabilidade em um driver não comprometa o Vortex Core.
+* Independência do Core: O Vortex Core System é autossuficiente, utilizando seus próprios drivers de emergência embutidos (ex: framebuffer VGA, teclado PS/2 de baixo nível) para funções críticas durante o boot. Os drivers de alto nível instalados pelo usuário servem para funcionalidades avançadas (aceleração gráfica, áudio HD, etc.).
+* Instalação via Terminal (vxmod install):
+   * Processo explícito e informativo.
+   * O package_manager realiza uma pré-análise e apresenta um resumo com informações como autor, assinatura (se verificada) e permissões solicitadas (diretamente do manifesto do módulo).
+   * Consentimento Ativo: Para drivers da comunidade ou experimentais, o sistema exige que o usuário digite EU-ACEITO-O-RISCO para prosseguir, forçando a compreensão do risco.
+   * Análise do Guardian: Mesmo após o consentimento, o Guardian Core é invocado para uma segunda camada de verificação, exibindo uma tela de confirmação imune a spoofing, reforçando as permissões e exigindo interação de hardware.
+* Proteção de Memória (IOMMU): O Vortex Core utiliza a IOMMU (Input/Output Memory Management Unit) do hardware para aplicar a política das Bolhas de Segurança. Isso mapeia restritivamente a memória, bloqueando acessos indevidos por hardware e garantindo que um driver malicioso não possa ler ou escrever em áreas de memória não autorizadas (como a memória do Core ou de outras aplicações).
+2. Estrutura de Diretórios dos Drivers
+Os drivers de dispositivo de alto nível estão localizados em:
+vortex_x/src/modulos_sistema/modulos_sistematicos/drivers/
+* audio/
+* filesystem/
+   * ext4_driver/
+   * ntfs_driver/
+* gpu/
+* network/
+* storage/
+   * nvme_driver/
+   * usb_storage_driver/
+* Funcionamento: O Vortex System carrega e gerencia esses drivers. Eles rodam em suas próprias Bolhas de Segurança e não podem desenhar na tela diretamente; eles fornecem uma interface (API) para o compositor.
+3. Serviços de Sistema (em Espaço de Usuário)
+São processos de longa duração que fornecem funcionalidades essenciais para o sistema e para as aplicações, operando em Bolhas de Segurança apropriadas.
+* Localização: vortex_x/src/modulos_sistema/modulos_sistematicos/services/
+* Tecnologia: Principalmente Rust ou Go.
+* Interação: Todos os serviços se comunicam entre si e com o Vortex Core através do sistema IPC de Bolhas de Segurança, expondo um conjunto de APIs para outros serviços e aplicações.
+3.1. Detalhes de Serviços Específicos:
+* filesystem_service:
+   * Gerencia o acesso ao sistema de arquivos (VortexFS), permissões de usuário, cache de disco, indexação.
+   * Implementa o VortexFS, um sistema de arquivos nativo com Copy-on-Write (CoW), checksums de dados/metadados e criptografia integrada.
+* network_service:
+   * Gerencia conexões de rede, DHCP, DNS, firewall de alto nível, roteamento, VPNs.
+   * Adapta uma pilha de rede moderna e segura como smoltcp (escrita em Rust).
+* security_service (Alto Nível):
+   * Complementa o Guardian Core com funcionalidades como gerenciamento de chaves, políticas de segurança de usuário, auditoria de eventos de segurança e integração com sistemas de detecção de intrusão.
+* audio_service:
+   * Gerencia a saída e entrada de áudio, mixagem e roteamento de áudio.
+* print_service:
+   * Gerencia filas de impressão e drivers de impressora. A implementação adaptaria o padrão CUPS (Common Unix Printing System) para rodar em uma Bolha de Segurança.
+* notification_service:
+   * Gerencia o sistema de notificações do Vortex X, permitindo que aplicações e serviços enviem alertas ao usuário de forma consistente e segura.
+* package_manager:
+   * Gerencia a instalação, atualização e remoção de pacotes de software (vxmod CLI).
+   * Integra-se com o LVFS (Linux Vendor Firmware Service) para gerenciamento de firmware.
+* configuration_service:
+   * Um serviço para armazenar configurações do sistema e de aplicações de forma persistente e segura.
+* power_manager:
+   * Responsável por todas as políticas de energia (interface com ACPI, suspensão/hibernação, gerenciamento de CPU P-states/C-states, perfis de energia).
+* time_service:
+   * Comunica-se periodicamente com servidores NTP (Network Time Protocol) para manter o relógio do sistema sincronizado.
+* virtualization_service:
+   * Utiliza extensões de hardware (Intel VT-x, AMD-V) para rodar outras máquinas virtuais. O Guardian Core atua como um hypervisor de "nível 0", lançando VMs inteiras dentro de "Mega-Bolhas" de segurança, impedindo escapes para o sistema hospedeiro.
+* accessibility_service:
+   * Expõe um "barramento" de IPC dedicado para tecnologias assistivas (leitores de tela, lupas). O Guardian Core garante que essas tecnologias tenham as permissões necessárias sem comprometer dados sensíveis.
+4. Bibliotecas de Sistema (libs/)
+As bibliotecas de sistema fornecem as APIs para que desenvolvedores possam criar aplicações e módulos para o Vortex X.
+* Localização: vortex_x/src/libs/
+* APIs Expostas:
+   * libc_vortex/: A biblioteca C padrão customizada para o Vortex X. Implementa funções padrão da C (open, read, malloc, free) que, internamente, fazem chamadas de sistema (syscalls) para o Vortex Core usando a ABI definida.
+   * libsystem_api: Biblioteca padrão do sistema, contendo APIs de alto nível para gerenciamento de processos, IPC, rede, etc.
+   * libui: Kits de ferramentas de UI para construir interfaces gráficas.
+   * libnetwork: Abstrações de alto nível para rede.
+   * libsecurity: APIs de segurança.
+   * libsync: Primitivas de sincronização (mutexes, semáforos, variáveis de condição, barreiras).
+   * libdevice: Abstrações para interagir com drivers de alto nível (ex: ler dados de sensores, controlar atuadores).

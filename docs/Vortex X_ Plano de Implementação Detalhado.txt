@@ -1,0 +1,51 @@
+﻿Vortex X: Plano de Implementação Detalhado
+Este plano descreve os passos detalhados para a implementação do sistema operacional Vortex X, divididos em fases e com foco nas entregas e tecnologias.
+FASE 1: "Ignition" (Prova de Conceito)
+Objetivo: Bootar em um shell funcional em QEMU, estabelecendo os fundamentos do microkernel.
+Passos Detalhados:
+1. Configuração Inicial e Estrutura de Diretórios:
+   * A pasta vortex-x-system foi criada.
+   * Os diretórios simulando os repositórios GitHub (vortex-guardian, vortex-community-modules, vortex-system-modules, vortex-x, vortex-x-iso) foram criados dentro de vortex-x-system.
+   * A estrutura interna de pastas dentro de vortex-x foi estabelecida.
+   * O script vortex_uploader.sh foi criado para simular o envio de atualizações para esses diretórios no GitHub.
+   * Todos os documentos de arquitetura e design fornecidos foram "clonados" para o diretório vortex-x/docs/.
+   * O arquivo progresso.txt foi criado e será atualizado em cada etapa.
+2. Implementação do Makefile Inteligente:
+   * Um Makefile será criado no diretório vortex-x/.
+   * Este Makefile será configurado para utilizar xorriso para a criação da imagem ISO.
+   * Ele será inteligente para identificar automaticamente os arquivos-fonte a serem compilados (Assembly, Rust, C++) e orquestrar o processo de compilação.
+   * Após a compilação e criação da ISO, o Makefile será capaz de iniciar automaticamente o QEMU para testar o boot do sistema.
+3. Desenvolvimento do boot.asm (Assembly):
+   * Um arquivo boot.asm será criado em vortex-x/src/arch/x86-64/bootloader/.
+   * Este arquivo será mínimo, contendo apenas o código necessário para exibir a mensagem "Vortex X System" na tela.
+   * Ele será responsável por carregar o próximo estágio do boot, o vortex_x_loader.
+4. Desenvolvimento do vortex_x_loader (Rust):
+   * Um módulo Rust para o vortex_x_loader será criado em vortex-x/src/arch/x86-64/bootloader/.
+   * Este componente será responsável por preparar o ambiente de execução, incluindo a transição para o modo de 64 bits (long mode).
+   * Após a preparação, ele passará o controle para o vortex_core_manager.
+5. Desenvolvimento do vortex_core_manager (Rust):
+   * O ponto de entrada principal do Vortex Core, o vortex_core_manager, será implementado em Rust em vortex-x/src/vortex_core_system/main.rs.
+   * Este será o início da parte principal do microkernel em Rust.
+6. Implementação dos Sistemas Core (Rust):
+   * Após o vortex_core_manager, os sistemas fundamentais do Vortex Core serão implementados em Rust.
+   * Isso inclui:
+      * Paging (Paginação de Memória): Gerenciamento de memória virtual.
+      * IPC (Comunicação Interprocessos): O sistema Vortex Secure Channel (VSC).
+      * IDT (Interrupt Descriptor Table): Manipulação de interrupções.
+      * Outros componentes essenciais do microkernel.
+7. Implementação do Guardian Core:
+   * O Guardian Core será implementado, integrando seus mecanismos de Bolhas de Segurança, ocultação de memória e interceptação de syscalls.
+   * As telas de alerta e confirmação do Guardian serão desenvolvidas.
+8. Implementação dos Módulos de Sistema:
+   * Os módulos essenciais do Vortex System, como o filesystem_service, network_service, e os drivers de alto nível, serão desenvolvidos e integrados.
+9. Início do Vortex System (Ambiente do Usuário):
+   * Com a base do Core e os módulos de sistema estabelecidos, o desenvolvimento do Vortex System, que compreende o ambiente de usuário e a interface gráfica (Sanctuary), será iniciado.
+Entregas da Fase 1:
+* Estrutura de diretórios completa e organizada.
+* vortex_uploader.sh funcional (simulado).
+* Makefile inteligente capaz de compilar, criar ISO e executar QEMU.
+* boot.asm exibindo "Vortex X System" no QEMU.
+* vortex_x_loader realizando a transição para 64 bits.
+* vortex_core_manager como ponto de entrada do Core em Rust.
+* Primeiros sistemas do Core (paginação, IPC, IDT) implementados.
+Observação: Este documento será atualizado com informações mais específicas sobre as tarefas, responsáveis, prazos e dependências de cada etapa de implementação.

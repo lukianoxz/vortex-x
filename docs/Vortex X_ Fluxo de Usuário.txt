@@ -1,0 +1,44 @@
+﻿Vortex X: Fluxo de Usuário
+Este documento descreve a experiência do usuário ao interagir com o sistema operacional Vortex X, desde o processo de inicialização até a interface do ambiente de desktop.
+1. Inicialização do Sistema (Primeiro Boot ou ISO)
+Ao iniciar o sistema a partir de uma ISO ou pela primeira vez após a instalação, o usuário será guiado por um fluxo específico:
+* Tela de Carregamento Inicial: Uma tela preta exibirá a logo do sistema, vortex-x-png, por alguns segundos. Durante este período, o vortex_updater realiza verificações de integridade da ISO e prepara o ambiente.
+* Menu de Boot Principal: O sistema então transiciona para uma tela azul minimalista. No topo, estará escrito "Vortex X", e abaixo, duas opções principais:
+   * "Tentar Vortex X": Ao selecionar esta opção, um aviso explícito será exibido, informando que nada será salvo e que esta é uma experiência limitada, destinada apenas a testar o sistema. O sistema iniciará em um ambiente "Live", carregado na memória RAM.
+   * "Instalar Vortex X": Esta opção inicia o processo de instalação. O sistema guiará o usuário pela criação de partições na memória (ou disco), copiará os arquivos essenciais da ISO e, ao final, solicitará a reinicialização do computador.
+2. Inicialização do Sistema (Pós-Instalação)
+Após a instalação e a primeira reinicialização, o fluxo de boot se adapta para oferecer opções de gerenciamento do sistema:
+* Tela de Carregamento Pós-Instalação: Novamente, a logo vortex-x-png será exibida por alguns segundos.
+* Menu de Opções do Sistema: O usuário será direcionado para uma tela azul similar à do boot inicial, com "Vortex X" no topo, mas agora com quatro opções:
+   * "Atualizar Sistema": Esta opção inicia um processo de verificação abrangente. O sistema compara a integridade e as versões dos componentes instalados com os dados dos cinco diretórios do GitHub (excluindo o da ISO). Enquanto a atualização ocorre, o Guardian Core monitora e verifica se há qualquer atividade maliciosa. Após a conclusão da atualização no disco, o sistema é reiniciado.
+   * "Restauração/Backups": Ao selecionar esta opção, o sistema exibirá uma lista de pontos de restauração automáticos gerados. Duas sub-opções estarão disponíveis:
+      * "Restaurar completamente": Reverte o sistema para um estado anterior, sem manter arquivos pessoais.
+      * "Restaurar mas manter arquivos": Reverte o sistema, mas tenta preservar os arquivos e configurações do usuário.
+   * "Start Vortex X": Esta é a opção para iniciar o ambiente de usuário. O vortex_system começa a carregar todos os seus componentes. Uma tela preta com a logo do Vortex X será exibida durante o carregamento. O vortex_guardian continuará analisando a integridade e segurança, enquanto o vortex_core_manager se prepara para lidar com possíveis erros. Quando tudo estiver pronto, o usuário será levado ao ambiente de desktop.
+   * "Exit": Desliga o computador.
+3. Criação de Conta de Usuário (Primeiro "Start Vortex X")
+Se nenhuma conta de usuário for detectada no primeiro "Start Vortex X" após a instalação, o sistema perguntará:
+* "Deseja criar novo usuário ou usar sem conta?"
+   * Se o usuário optar por "usar sem conta", um aviso será exibido informando que os arquivos não serão salvos e serão perdidos ao desligar. A sessão será iniciada sem persistência de dados.
+   * Se o usuário escolher "criar novo usuário", será solicitado que "digite seu nome". Em seguida, o sistema perguntará "deseja habilitar senha para entrar? (poderá alterar mais tarde)". Após a confirmação, a conta será criada.
+4. Ambiente de Desktop: Sanctuary
+A partir do vortex_system, a interface do usuário, codinome Sanctuary, adota um visual moderno com elementos de vidro fosco.
+* Papel de Parede: Uma imagem com a logo do sistema em um fundo preto.
+* Ícones na Área de Trabalho: Por padrão, haverá um ícone para a "Lixeira". Se as imagens não estiverem disponíveis, os ícones serão representados por um cubo branco.
+* Barra Inferior (Doca de Controle):
+   * Localizada no centro inferior da tela, com bordas arredondadas.
+   * Possui um semicírculo decorativo em cada extremidade.
+   * O ícone central é o do Vortex X.
+   * Ao adicionar atalhos, eles se movem para centralizar na barra.
+   * Se houver mais atalhos do que o espaço disponível para a escala atual da UI, um slider aparecerá para permitir a navegação entre eles.
+* Menu Iniciar (Logo do Vortex X):
+   * Sempre localizado no lado esquerdo da doca de controle.
+   * Ao clicar na logo, um menu similar ao do Windows 11 é aberto.
+   * É uma janela quadrada com cantos arredondados.
+   * Possui uma barra de pesquisa no topo.
+   * Abaixo da barra de pesquisa, há um slider que exibe os programas instalados no computador.
+* Sistema de Janelas: O sistema de janelas do Vortex X seguirá um esquema similar ao do Windows, com funcionalidades de redimensionamento, minimização, maximização e fechamento.
+* Configurações do Sistema: O menu de configurações é dividido em dois níveis:
+   * Configurações Normais (Vortex System): Contém opções de configuração mais comuns e acessíveis ao usuário.
+   * Configurações Protegidas (Guardian): Esta seção é protegida pelo Guardian Core contra acesso não autorizado (incluindo macros maliciosas). Ela contém configurações sensíveis como a senha do usuário, gerenciamento de módulos de sistema e o esquema de Bolhas de Segurança. O acesso a essas configurações exigirá uma confirmação adicional pelo Guardian.
+* Botão de Desligar (Menu Iniciar): No canto do menu iniciar, haverá um botão padrão de desligar. Ao clicar nele, aparecerão as opções: "Modo de suspensão", "Reiniciar" e "Desligar".

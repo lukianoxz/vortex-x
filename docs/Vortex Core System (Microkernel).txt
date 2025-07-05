@@ -1,0 +1,32 @@
+﻿Vortex Core System (Microkernel)
+O Vortex Core System é o coração do sistema operacional Vortex X, atuando como um microkernel minimalista e a base fundamental para a segurança e eficiência de todo o sistema. Ele opera na camada de mais baixo nível, diretamente sobre o hardware, e é responsável pelas funções mais críticas e essenciais.
+1. Funções Essenciais do Vortex Core
+* Comunicação Interprocessos (IPC) - Vortex Secure Channel (VSC):
+   * Gerencia a troca de mensagens entre todos os módulos e serviços do sistema.
+   * Implementa um modelo híbrido: Síncrono (Request/Reply) para chamadas de sistema e Assíncrono (Message Passing) para eventos e notificações.
+   * Mecanismo de Segurança: Toda comunicação entre Bolhas de Segurança diferentes passa obrigatoriamente pelo Vortex Core. O Core verifica a identidade do emissor e do receptor, e consulta o manifesto de segurança do módulo emissor para autorização. Para transferências de grandes volumes de dados, o VSC pode estabelecer uma região de memória compartilhada temporária, mas a IOMMU é configurada pelo Core para garantir que ambos os processos só possam acessar aquela região específica.
+* Gerenciamento Básico de Memória:
+   * Responsável pelo mapeamento de endereços virtuais para físicos.
+   * Ocultação de Memória (Fortaleza Invisível do Guardian Core): O Vortex Core constrói um espaço de endereço virtual completamente novo e personalizado para cada processo. As páginas de memória física que contêm o Vortex Core, o Guardian Core e outros componentes críticos simplesmente não são mapeadas nesse espaço, tornando-as invisíveis para processos de nível inferior. Isso impede que malwares tentem ler, escrever ou atacar endereços que, em sua "realidade" virtual, não existem.
+* Agendamento de Threads - Vortex Quantum Scheduler:
+   * Aloca o tempo de CPU de forma justa, eficiente e segura.
+   * Implementa um agendador preemptivo de Múltiplas Filas com Retroalimentação (Multi-level Feedback Queue - MLFQ).
+   * Filas de Prioridade: Organiza tarefas em filas baseadas em sua Bolha de Segurança e comportamento (Fila de Tempo Real, Fila Interativa, Fila Normal, Fila de Fundo).
+   * Integração com Segurança: A prioridade de um processo nunca pode ser elevada acima do máximo permitido pela sua Bolha, garantindo que a UI de alerta do Guardian Core sempre tenha precedência.
+* Manipulação de Interrupções:
+   * Lida com interrupções de hardware e software, garantindo a resposta adequada do sistema a eventos externos e internos.
+2. Implementação e Tecnologias
+* Linguagem de Programação: Prioridade máxima para Rust devido às suas garantias de segurança de memória em tempo de compilação e concorrência segura. O uso de Assembly é mínimo e estratégico, apenas para pontos de entrada do sistema e manipulação direta de registradores da CPU.
+* Bootloader (vortex_secure_loader):
+   * Primeira linha de código executada após a inicialização do firmware (UEFI).
+   * Desenvolvido como um aplicativo UEFI independente em Rust (usando uefi-rs) e assinado digitalmente.
+   * Integração com Secure Boot: Suporta nativamente o UEFI Secure Boot, verificando assinaturas criptográficas do vortex_loader.efi, Vortex Core e Guardian Core antes do carregamento. Qualquer falha interrompe o boot.
+   * Responsável por exibir o "Menu de Ações Primordiais".
+* Drivers de Emergência: O Vortex Core System é totalmente autossuficiente, utilizando seus próprios drivers minimalistas e embutidos (ex: framebuffer VGA, teclado PS/2 de baixo nível) durante o boot e em modos de recuperação. Ele não depende de drivers complexos de alto nível para suas funções críticas.
+3. Gerenciamento de Arquivos (VortexFS - Nível Core)
+Embora o filesystem_service opere em espaço de usuário, o Vortex Core expõe as primitivas de baixo nível (syscalls) para as operações de arquivo.
+* APIs de Sistema de Arquivos (Syscalls): O Core define um conjunto de syscalls essenciais como SYS_OPEN, SYS_READ, SYS_WRITE, SYS_CLOSE, SYS_STAT, SYS_MKDIR, SYS_UNLINK, SYS_RMDIR, SYS_RENAME, SYS_GETDENTS.
+* Controle Centralizado: O Core gerencia a alocação de memória, descritores de arquivo e o isolamento de processos, garantindo que cada processo só possa acessar os arquivos para os quais tem permissão.
+4. Pilha de Rede (NetStack Service - Nível Core)
+Apesar de o network_service rodar em espaço de usuário, o Vortex Core interage com os drivers de rede de baixo nível.
+* Isolamento: O network_service (rodando em sua própria Bolha) se comunica com os drivers de rede de baixo nível (que rodam em Bolhas ainda mais restritas) através do VSC, enviando e recebendo pacotes Ethernet puros. Isso isola completamente a lógica de rede do hardware.

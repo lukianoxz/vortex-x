@@ -1,0 +1,77 @@
+﻿Estrutura de Diretórios do Projeto Vortex X (GitHub e Local)
+O projeto Vortex X adota uma estratégia de monorepo para o código-fonte principal e polyrepos para módulos e inteligência de ameaças, garantindo organização, segurança e facilidade de contribuição.
+1. Estrutura Local Principal (vortex_x_system/)
+Este é o diretório raiz local onde o desenvolvimento e a compilação do Vortex X ocorrem.
+vortex_x_system/
+├── vortex-guardian/             # Repositório clonado do GitHub (lukianoxz/vortex-guardian)
+├── vortex-community-modules/    # Repositório clonado do GitHub (lukianoxz/vortex-community-modules)
+├── vortex-system-modules/       # Repositório clonado do GitHub (lukianoxz/vortex-system-modules)
+├── vortex-x/                    # Repositório principal do Vortex X OS (monorepo)
+│   ├── src/
+│   │   ├── arch/                   # Código específico da arquitetura (x86-64, aarch64, riscv)
+│   │   │   └── x86-64/
+│   │   │       ├── bootloader/         # vortex_core_loader (boot.asm, stage1.asm)
+│   │   │       ├── hardware_access/
+│   │   │       └── vortex_core_entry/  # vortex_core_entry.asm
+│   │   ├── libs/                   # Bibliotecas de sistema (libc_vortex, libsystem_api, libui, etc.)
+│   │   ├── linguagens_e_implementacoes/ # Detalhes sobre linguagens e escolhas de implementação
+│   │   ├── modulos_core/           # Módulos que fazem parte do Vortex Core
+│   │   │   ├── guardian_core_information/ # Banco de Dados de Inteligência de Ameaças
+│   │   │   └── vortex_priority_module/ # Módulo de Prioridade e Ambiente
+│   │   ├── modulos_sistema/        # Módulos que fazem parte do Vortex System
+│   │   │   ├── modulos_operacionais/
+│   │   │   │   └── windows_compatibility_service/ # Subsistema Wine-like
+│   │   │   ├── modulos_sistematicos/
+│   │   │   │   ├── drivers/            # Drivers de dispositivo de alto nível (audio, filesystem, gpu, network, storage)
+│   │   │   │   ├── services/           # Serviços do sistema (filesystem_service, network_service, etc.)
+│   │   │   │   └── vortex_update_integrity_manager/ # Orquestrador de Atualização e Integridade
+│   │   │   └── modulos_usuario/
+│   │   │       └── userland/           # Interface de Usuário e Aplicações (desktop_environment, authentication_manager, settings_manager)
+│   │   ├── vortex_core_system/     # Microkernel (Vortex Core) - main.rs, ipc.rs, memory.rs, scheduler.rs, etc.
+│   │   └── vortex_system/          # Kernel de Alto Nível (Vortex System) - main.rs, process_manager.rs, filesystem_vfs.rs, etc.
+│   ├── build/                      # Diretório para artefatos de compilação intermediários
+│   ├── output/                     # Diretório de saída para artefatos finais (ISO)
+│   ├── docs/                       # Documentação do projeto (design, APIs, etc.)
+│   ├── tools/                      # Ferramentas de desenvolvimento (scripts de build, emuladores, etc.)
+│   ├── vortex_compile.sh           # Script de compilação principal
+│   ├── vortex_web.sh               # Script de envio para o GitHub via SSH (vortex uploader)
+│   └── README.md
+├── vortex-x-iso/                # Diretório para a ISO final (pode ser um link simbólico para output/vortex-x.iso)
+└── vortex_uploader.sh           # Script local para enviar atualizações para os repositórios GitHub
+
+2. Repositórios GitHub (Perfil lukianoxz)
+Os seguintes diretórios são repositórios Git separados, mantidos no perfil do GitHub lukianoxz, e são clonados para a estrutura local conforme a necessidade de desenvolvimento e atualização.
+* vortex-guardian/ (GitHub: lukianoxz/vortex-guardian)
+   * Propósito: Contém o código das defesas do Guardian Core e a inteligência de ameaças (guardian_core_information).
+   * Atualização: Ao ligar o sistema, ele busca atualizações nesses diretórios para garantir que as defesas estejam sempre atualizadas. Isso é crucial para a segurança em tempo real.
+   * Conteúdo: malware_db.rs, signature_store.rs, lógica de detecção e mitigação de ameaças.
+   * Licença: GNU AGPLv3 (para garantir que modificações em serviços de rede sejam compartilhadas).
+* vortex-community-modules/ (GitHub: lukianoxz/vortex-community-modules)
+   * Propósito: Armazena os módulos desenvolvidos e contribuídos pela comunidade.
+   * Acesso: Os usuários podem baixar e instalar esses módulos através do Gerenciador de Módulos (Nexus).
+   * Moderação: Passam por uma moderação básica e são claramente marcados como "não-oficiais". A instalação pode exigir permissões explícitas do Guardian.
+   * Licença: Geralmente GNU GPLv3, mas pode variar conforme a contribuição.
+* vortex-system-modules/ (GitHub: lukianoxz/vortex-system-modules)
+   * Propósito: Contém os módulos oficiais do sistema, como o windows_compatibility_service (Wine-like), drivers de alto nível, e outros serviços essenciais que não fazem parte do vortex_x monorepo principal.
+   * Garantia: Desenvolvidos e assinados digitalmente pela equipe Vortex X, com garantia de segurança e compatibilidade.
+   * Atualização: Atualizados através do sistema de atualização padrão do Vortex X.
+   * Licença: GNU GPLv3.
+* vortex-x/ (GitHub: lukianoxz/vortex-x)
+   * Propósito: Este é o monorepo principal que contém todo o código-fonte do sistema operacional Vortex X, incluindo o Vortex Core System, Vortex System, e a estrutura de módulos base.
+   * Conteúdo: Inclui os diretórios src/, build/, output/, docs/, tools/, e os scripts de compilação e upload (vortex_compile.sh, vortex_web.sh).
+   * Desenvolvimento: O trabalho principal de desenvolvimento do sistema operacional ocorre dentro deste repositório.
+   * Licença: GNU GPLv3.
+* vortex-x-iso/ (GitHub: lukianoxz/vortex-x-iso)
+   * Propósito: Este repositório é o destino exclusivo para as imagens ISO finais do sistema operacional Vortex X após a compilação bem-sucedida.
+   * Conteúdo: Conterá os arquivos .iso gerados pelo vortex_compile.sh, que incluem o Vortex Core System, Vortex System, e todos os módulos oficiais pré-compilados.
+   * Distribuição: Usado para disponibilização pública das versões do sistema.
+   * Licença: Inclui o LICENSE da ISO final.
+3. Script vortex_uploader.sh (Local)
+* Localização: vortex_x_system/vortex_uploader.sh
+* Propósito: Este script local será responsável por orquestrar o envio de todas as atualizações (ISO, módulos do sistema, módulos da comunidade, e atualizações do Guardian) para seus respectivos repositórios GitHub via SSH.
+* Funcionalidade:
+   1. Chama vortex_compile.sh para gerar os artefatos mais recentes.
+   2. Organiza os arquivos gerados em diretórios temporários.
+   3. Utiliza comandos git add, git commit, git push com autenticação SSH para enviar os artefatos para lukianoxz/vortex-x-iso, lukianoxz/vortex-system-modules, lukianoxz/vortex-community-modules, e lukianoxz/vortex-guardian.
+   4. Garante que as credenciais SSH estejam configuradas previamente no ambiente.
+* Integração CI/CD: Este script será um componente chave no pipeline de Entrega Contínua (CD) do Vortex X, garantindo que novas versões e atualizações sejam publicadas de forma automatizada e segura após a aprovação nos testes.

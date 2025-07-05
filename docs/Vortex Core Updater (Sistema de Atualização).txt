@@ -1,0 +1,42 @@
+﻿Vortex Core Updater (Sistema de Atualização)
+O sistema de atualização do Vortex X é projetado para ser seguro, atômico e transparente, garantindo a integridade do sistema desde o boot até as atualizações de módulos.
+1. Componentes Principais
+* vortex_update_core (Parte do Vortex Core System):
+   * Responsável por coordenar as atualizações de baixo nível e garantir a atomicidade do processo.
+   * Opera em um ambiente mínimo controlado diretamente pelo Vortex Core, antes mesmo do Vortex System (kernel de alto nível) ser carregado.
+   * Interage com o vortex_secure_loader para verificações de integridade no boot.
+* vortex_update_integrity_manager (Módulo do Vortex System):
+   * O orquestrador de atualização e integridade do sistema (não do core).
+   * Gerencia a busca, download, verificação e aplicação de atualizações para os módulos do Vortex System e aplicações de usuário.
+   * Coordena com o vortex_update_core para atualizações atômicas.
+* package_manager (Serviço do Sistema):
+   * Gerencia a instalação, atualização e remoção de pacotes de software (vxmod CLI).
+   * Realiza pré-análises de módulos e solicita consentimento explícito do usuário para instalações de risco.
+   * Integra-se com o LVFS (Linux Vendor Firmware Service) para gerenciamento de firmware de dispositivos.
+2. Processo de Atualização
+1. Geração e Assinatura Digital:
+   * Após compilação e testes bem-sucedidos, os pacotes de módulos e a imagem ISO são gerados.
+   * Cada pacote é assinado digitalmente usando chaves privadas altamente protegidas. Um hash criptográfico do pacote é gerado e assinado, e o arquivo de assinatura (.sig) é distribuído junto com o pacote.
+2. Distribuição:
+   * Os módulos oficiais são distribuídos através de repositórios de software seguros (HTTP/HTTPS com TLS) controlados pela equipe do Vortex X.
+   * O script vortex_web.sh (localizado em vortex_x/vortex_web.sh) é responsável por organizar e enviar os artefatos compilados (ISO e pacotes de módulos) para os repositórios GitHub (system-modules e community-modules) de forma organizada e segura via SSH.
+3. Verificação de Assinatura:
+   * O Instalador de Módulos (Nexus) e o vortex_update_integrity_manager verificam a assinatura usando a chave pública correspondente antes de instalar ou atualizar qualquer módulo. Isso impede a instalação de software malicioso ou adulterado.
+4. Atualizações Atômicas:
+   * O vortex_update_integrity_manager coordena com o vortex_update_core para aplicar atualizações como uma única transação. Ou a atualização é totalmente bem-sucedida, ou o sistema reverte para o estado anterior, evitando corrupção em caso de falha.
+5. Rollbacks Seguros:
+   * O sistema de arquivos VortexFS (Copy-on-Write - CoW) permite a criação de snapshots instantâneos e atômicos do sistema. Isso facilita rollbacks rápidos e seguros para uma versão anterior do sistema em caso de problemas pós-atualização.
+3. Gerenciamento de Atualizações via Menu do Vortex Core
+O "Menu de Ações Primordiais" (acessível no boot) oferece opções críticas de gerenciamento de atualizações e restauração:
+* [2] Gerenciador de Atualizações:
+   * Inicia o vortex_update_integrity_manager em modo de manutenção.
+   * Busca por novas versões assinadas do sistema no repositório oficial.
+   * Baixa a atualização para um diretório temporário e seguro.
+   * Cria um backup completo do sistema atual.
+   * Tenta aplicar a atualização. Se falhar, reverte automaticamente para o backup.
+* [3] Sistema de Restauração:
+   * Nível 1 (Reparação de Danos): Compara os hashes dos arquivos de sistema com os do último backup bom ou do repositório oficial e substitui apenas os arquivos corrompidos.
+   * Nível 2 (Reinstalação Total): Formata a partição do Vortex System e reinstala a imagem mínima (contendo apenas o Vortex Core e o vortex_update_core) via rede Wi-Fi ou de um backup. Durante este processo, exibe a pergunta: "Você permite a coleta de dados de ameaças anônimas pelo Guardian para melhorar a segurança global do Vortex X? [S/N]".
+4. Rede de Inteligência de Ameaças Distribuída
+* Conceito: Uma rede descentralizada (possivelmente usando tecnologias como blockchain ou DLTs leves) onde os nós do Vortex X podem compartilhar e validar informações de ameaças de forma segura e anônima.
+* Funcionamento: Se o usuário permitir, o vortex_update_integrity_manager coletará metadados sobre ameaças detectadas e os enviará para esta rede. Os dados recebidos serão validados e adicionados ao guardian_core_information de cada sistema Vortex X, criando um sistema de defesa coletivo e auto-evolutivo.

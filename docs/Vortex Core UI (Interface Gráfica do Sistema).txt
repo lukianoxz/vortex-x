@@ -1,0 +1,47 @@
+﻿Vortex Core UI (Interface Gráfica do Sistema)
+A interface gráfica do Vortex X, codinome Sanctuary, é projetada para ser limpa, rápida e funcional, priorizando a clareza, o foco e o controle do usuário.
+1. Filosofia de Design
+* "Menos, mas melhor": Sem distrações desnecessárias. A informação é apresentada quando necessária.
+* Paleta de Cores: Suave, com cinzas escuros, brancos e um azul "Vortex" como cor de destaque.
+* Fonte: Limpa e legível (similar a Inter ou San Francisco).
+2. Experiência de Boot e Instalação
+* Menu de Boot da ISO (Live Environment):
+   * Aparência: Fundo preto, texto branco, logo do Vortex X (🌀).
+   * Opções: "Tentar Vortex X" (Modo Live), "Instalar Vortex X", "Verificação de Hardware", "Opções Avançadas".
+   * Modo Live: Carrega o sistema na RAM, sem escrita em disco, com todas as funcionalidades de segurança ativas.
+* Processo de Instalação Gráfica:
+   * Design: Minimalista e elegante, janelas com cantos arredondados, fundo cinza escuro.
+   * Etapas: Seleção de Idioma/Teclado/Fuso Horário, Particionamento (simples ou avançado com VortexFS), Criação de Usuário (com verificação de senha e nota sobre Vortex Vault), Resumo e Confirmação.
+* Tela do Vortex Core (Primeiro Boot Instalado):
+   * Aparência: Fundo azul escuro, texto branco, dividido em seções lógicas ([Status do Núcleo], [Verificação de Integridade]).
+   * Funcionalidade: Exibe status de componentes críticos (Loader, Guardian Core, Scheduler, IPC, VortexFS, Módulos do Sistema) com indicadores [OK], [WARN], [FAIL]. Permite alternar para logs detalhados ('L').
+3. Ambiente de Desktop: Sanctuary
+3.1. Layout Geral e Barra de Tarefas ("Doca de Controle")
+* Descrição: Barra de tarefas flutuante e minimalista na parte inferior da tela, que se expande levemente ao passar o mouse.
+* Ícones Padrão (da esquerda para a direita):
+   * 🌀 Menu Vortex: Lançador de aplicações (grade centralizada de ícones com barra de pesquisa).
+   * 🗂️ Gerenciador de Arquivos (Explorer): Ícone de pasta estilizada.
+   * 🌍 Navegador (Portal): Ícone de globo terrestre minimalista.
+   * 🖥️ Terminal (Console): Ícone >_.
+   * 📦 Gerenciador de Módulos (Nexus): Ícone de caixa aberta.
+* Área de Status (canto direito): Ícones para Rede, Volume, Bateria e um pequeno escudo 🛡️ para o Status do Guardian.
+3.2. Detalhes dos Componentes Principais
+* 🗂️ Gerenciador de Arquivos (Explorer):
+   * Visual: Extremamente limpo, barra lateral com Favoritos e Dispositivos.
+   * Integração com Segurança: Pequeno círculo colorido ao lado de executáveis indica Bolha de Segurança (Verde - Bolha 1, Amarelo - Bolha 2, Vermelho - Bolha 3). Executar arquivo de Bolha 3 aciona alerta do Guardian.
+* 🖥️ Terminal (Console):
+   * Visual: Janela translúcida com texto monoespaçado. Prompt [usuário@vortex 🌀]$.
+   * Segurança: Comandos administrativos (sudo-like) invocam a tela de confirmação do Guardian, com a borda do terminal ficando azul.
+* 🌍 Navegador (Portal):
+   * Visual: Interface sem cromo, barra de endereço aparece ao mover o mouse para o topo.
+   * Segurança: Roda por padrão na Bolha de Segurança 2. Downloads marcados para Bolha 3 até verificação.
+* 📦 Gerenciador de Módulos (Nexus):
+   * Visual: Interface similar a uma "App Store", limpa e baseada em cartões, com abas "Oficial" e "Comunidade".
+   * Processo de Instalação: Para módulos da comunidade, exibe claramente Autor, Permissões Solicitadas e um Aviso do Guardian ("Este módulo não é da equipe Vortex X. A sua instalação pode introduzir riscos de segurança ou instabilidade."). O botão de ação é "Entendo o Risco, Instalar" e invoca a tela de confirmação final do Guardian.
+3.3. Gerenciamento de UI (UI Manager/Compositor)
+* Localização: modulos_sistema/modulos_usuario/userland/desktop_environment/src/ui_compositor.rs.
+* Função: É o único processo (além dos serviços de alerta de alta prioridade) com permissão para "desenhar" na tela. Recebe "janelas" e conteúdos de outras aplicações e os compõe na imagem final para o gpu_driver.
+* Separação: A lógica da UI (o que mostrar) é separada do kit de ferramentas de UI (widgets) e do Compositor (como desenhar), garantindo que uma aplicação travada não congele a tela inteira.
+3.4. Drivers e Notificações do Sistema
+* Instalação de Drivers: Notificação sutil ("Novo dispositivo detectado...") com opção de "Instalar" via Nexus, levando à revisão de permissões e aprovação do Guardian.
+* Status do Guardian (🛡️): Ícone na doca de controle que muda de cor (Verde, Amarelo, Vermelho Piscando) para indicar o estado de segurança do sistema. Clicar no escudo abre um painel com os últimos eventos de segurança.
